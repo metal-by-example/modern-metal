@@ -13,6 +13,7 @@
 		83697CE020F4E96500B4C2A6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83697CDF20F4E96500B4C2A6 /* Assets.xcassets */; };
 		83697CE320F4E96500B4C2A6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 83697CE120F4E96500B4C2A6 /* LaunchScreen.storyboard */; };
 		83697CEB20F4EB7500B4C2A6 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83697CEA20F4EB7500B4C2A6 /* Renderer.swift */; };
+		83697CED20F4EDDD00B4C2A6 /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = 83697CEC20F4EDDD00B4C2A6 /* teapot.obj */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		83697CE220F4E96500B4C2A6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		83697CE420F4E96500B4C2A6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		83697CEA20F4EB7500B4C2A6 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		83697CEC20F4EDDD00B4C2A6 /* teapot.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +58,7 @@
 		83697CD720F4E96400B4C2A6 /* modern-metal */ = {
 			isa = PBXGroup;
 			children = (
+				83697CEC20F4EDDD00B4C2A6 /* teapot.obj */,
 				83697CD820F4E96400B4C2A6 /* AppDelegate.swift */,
 				83697CEA20F4EB7500B4C2A6 /* Renderer.swift */,
 				83697CDA20F4E96400B4C2A6 /* ViewController.swift */,
@@ -125,6 +128,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83697CED20F4EDDD00B4C2A6 /* teapot.obj in Resources */,
 				83697CE320F4E96500B4C2A6 /* LaunchScreen.storyboard in Resources */,
 				83697CE020F4E96500B4C2A6 /* Assets.xcassets in Resources */,
 				83697CDE20F4E96400B4C2A6 /* Main.storyboard in Resources */,
