@@ -9,36 +9,24 @@ struct Uniforms {
 }
 
 class Renderer: NSObject, MTKViewDelegate {
-    
     let device: MTLDevice
-    let mtkView: MTKView
     let commandQueue: MTLCommandQueue
-    var renderPipeline: MTLRenderPipelineState!
-    var vertexDescriptor: MTLVertexDescriptor!
+    var renderPipeline: MTLRenderPipelineState
+    var vertexDescriptor: MDLVertexDescriptor
     var meshes: [MTKMesh] = []
     var time: Float = 0
     
     init(view: MTKView, device: MTLDevice) {
-        self.mtkView = view
         self.device = device
-        self.commandQueue = device.makeCommandQueue()!
-
+        commandQueue = device.makeCommandQueue()!
+        vertexDescriptor = Renderer.buildVertexDescriptor()
+        renderPipeline = Renderer.buildPipeline(device: device, view: view, vertexDescriptor: vertexDescriptor)
         super.init()
-
         loadResources()
-        buildPipeline()
     }
     
     func loadResources() {
         let modelURL = Bundle.main.url(forResource: "teapot", withExtension: "obj")!
-        
-        let vertexDescriptor = MDLVertexDescriptor()
-        vertexDescriptor.attributes[0] = MDLVertexAttribute(name: MDLVertexAttributePosition, format: .float3, offset: 0, bufferIndex: 0)
-        vertexDescriptor.attributes[1] = MDLVertexAttribute(name: MDLVertexAttributeNormal, format: .float3, offset: MemoryLayout<Float>.size * 3, bufferIndex: 0)
-        vertexDescriptor.attributes[2] = MDLVertexAttribute(name: MDLVertexAttributeTextureCoordinate, format: .float2, offset: MemoryLayout<Float>.size * 6, bufferIndex: 0)
-        vertexDescriptor.layouts[0] = MDLVertexBufferLayout(stride: MemoryLayout<Float>.size * 8)
-        
-        self.vertexDescriptor = MTKMetalVertexDescriptorFromModelIO(vertexDescriptor)
         
         let bufferAllocator = MTKMeshBufferAllocator(device: device)
         
@@ -51,7 +39,25 @@ class Renderer: NSObject, MTKViewDelegate {
         }
     }
     
-    func buildPipeline() {
+    static func buildVertexDescriptor() -> MDLVertexDescriptor {
+        let vertexDescriptor = MDLVertexDescriptor()
+        vertexDescriptor.attributes[0] = MDLVertexAttribute(name: MDLVertexAttributePosition,
+                                                            format: .float3,
+                                                            offset: 0,
+                                                            bufferIndex: 0)
+        vertexDescriptor.attributes[1] = MDLVertexAttribute(name: MDLVertexAttributeNormal,
+                                                            format: .float3,
+                                                            offset: MemoryLayout<Float>.size * 3,
+                                                            bufferIndex: 0)
+        vertexDescriptor.attributes[2] = MDLVertexAttribute(name: MDLVertexAttributeTextureCoordinate,
+                                                            format: .float2,
+                                                            offset: MemoryLayout<Float>.size * 6,
+                                                            bufferIndex: 0)
+        vertexDescriptor.layouts[0] = MDLVertexBufferLayout(stride: MemoryLayout<Float>.size * 8)
+        return vertexDescriptor
+    }
+    
+    static func buildPipeline(device: MTLDevice, view: MTKView, vertexDescriptor: MDLVertexDescriptor) -> MTLRenderPipelineState {
         guard let library = device.makeDefaultLibrary() else {
             fatalError("Could not load default library from main bundle")
         }
@@ -63,12 +69,13 @@ class Renderer: NSObject, MTKViewDelegate {
         pipelineDescriptor.vertexFunction = vertexFunction
         pipelineDescriptor.fragmentFunction = fragmentFunction
         
-        pipelineDescriptor.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat
+        pipelineDescriptor.colorAttachments[0].pixelFormat = view.colorPixelFormat
         
-        pipelineDescriptor.vertexDescriptor = vertexDescriptor
+        let mtlVertexDescriptor = MTKMetalVertexDescriptorFromModelIO(vertexDescriptor)
+        pipelineDescriptor.vertexDescriptor = mtlVertexDescriptor
         
         do {
-            renderPipeline = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
+            return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
         } catch {
             fatalError("Could not create render pipeline state object: \(error)")
         }
@@ -83,7 +90,7 @@ class Renderer: NSObject, MTKViewDelegate {
         if let renderPassDescriptor = view.currentRenderPassDescriptor, let drawable = view.currentDrawable {
             let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
             
-            time += 1 / Float(mtkView.preferredFramesPerSecond)
+            time += 1 / Float(view.preferredFramesPerSecond)
             let angle = -time
             let modelMatrix = float4x4(rotationAbout: float3(0, 1, 0), by: angle) *  float4x4(scaleBy: 2)
 
