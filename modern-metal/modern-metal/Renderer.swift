@@ -14,7 +14,9 @@ class Renderer: NSObject, MTKViewDelegate {
     let commandQueue: MTLCommandQueue
     var renderPipeline: MTLRenderPipelineState
     let depthStencilState: MTLDepthStencilState
+    let samplerState: MTLSamplerState
     var vertexDescriptor: MDLVertexDescriptor
+    var baseColorTexture: MTLTexture?
     var meshes: [MTKMesh] = []
     var time: Float = 0
     
@@ -23,6 +25,7 @@ class Renderer: NSObject, MTKViewDelegate {
         commandQueue = device.makeCommandQueue()!
         vertexDescriptor = Renderer.buildVertexDescriptor()
         renderPipeline = Renderer.buildPipeline(device: device, view: view, vertexDescriptor: vertexDescriptor)
+        samplerState = Renderer.buildSamplerState(device: device)
         depthStencilState = Renderer.buildDepthStencilState(device: device)
         super.init()
         loadResources()
@@ -40,6 +43,11 @@ class Renderer: NSObject, MTKViewDelegate {
         } catch {
             fatalError("Could not extract meshes from Model I/O asset")
         }
+        
+        let textureLoader = MTKTextureLoader(device: device)
+        
+        let options: [MTKTextureLoader.Option : Any] = [.generateMipmaps : true, .SRGB : true]
+        baseColorTexture = try? textureLoader.newTexture(name: "tiles_baseColor", scaleFactor: 1.0, bundle: nil, options: options)
     }
     
     static func buildVertexDescriptor() -> MDLVertexDescriptor {
@@ -58,6 +66,15 @@ class Renderer: NSObject, MTKViewDelegate {
                                                             bufferIndex: 0)
         vertexDescriptor.layouts[0] = MDLVertexBufferLayout(stride: MemoryLayout<Float>.size * 8)
         return vertexDescriptor
+    }
+    
+    static func buildSamplerState(device: MTLDevice) -> MTLSamplerState {
+        let samplerDescriptor = MTLSamplerDescriptor()
+        samplerDescriptor.normalizedCoordinates = true
+        samplerDescriptor.minFilter = .linear
+        samplerDescriptor.magFilter = .linear
+        samplerDescriptor.mipFilter = .linear
+        return device.makeSamplerState(descriptor: samplerDescriptor)!
     }
     
     static func buildDepthStencilState(device: MTLDevice) -> MTLDepthStencilState {
@@ -115,6 +132,10 @@ class Renderer: NSObject, MTKViewDelegate {
             var uniforms = Uniforms(modelMatrix: modelMatrix, viewProjectionMatrix: viewProjectionMatrix, normalMatrix: modelMatrix.normalMatrix)
             
             commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout<Uniforms>.size, index: 1)
+            
+            commandEncoder.setFragmentTexture(baseColorTexture, index: 0)
+            
+            commandEncoder.setFragmentSamplerState(samplerState, index: 0)
             
             commandEncoder.setRenderPipelineState(renderPipeline)
             
