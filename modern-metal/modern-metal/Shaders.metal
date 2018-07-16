@@ -31,7 +31,10 @@ vertex VertexOut vertex_main(VertexIn vertexIn [[stage_in]],
     return vertexOut;
 }
 
+constant float3 ambientIntensity = 0.3;
+constant float3 baseColor(1.0, 0, 0);
+
 fragment float4 fragment_main(VertexOut fragmentIn [[stage_in]]) {
-    float3 normal = normalize(fragmentIn.eyeNormal.xyz);
-    return float4(abs(normal), 1);
+    float3 finalColor = ambientIntensity * baseColor;
+    return float4(finalColor, 1);
 }
