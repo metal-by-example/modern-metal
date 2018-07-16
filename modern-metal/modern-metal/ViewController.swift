@@ -20,7 +20,8 @@ class ViewController: UIViewController {
         let device = MTLCreateSystemDefaultDevice()!
         mtkView.device = device
         
-        mtkView.colorPixelFormat = .bgra8Unorm
+        mtkView.colorPixelFormat = .bgra8Unorm_srgb
+        mtkView.depthStencilPixelFormat = .depth32Float
         
         renderer = Renderer(view: mtkView, device: device)
         mtkView.delegate = renderer

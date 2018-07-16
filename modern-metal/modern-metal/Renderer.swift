@@ -12,6 +12,7 @@ class Renderer: NSObject, MTKViewDelegate {
     let device: MTLDevice
     let commandQueue: MTLCommandQueue
     var renderPipeline: MTLRenderPipelineState
+    let depthStencilState: MTLDepthStencilState
     var vertexDescriptor: MDLVertexDescriptor
     var meshes: [MTKMesh] = []
     var time: Float = 0
@@ -21,6 +22,7 @@ class Renderer: NSObject, MTKViewDelegate {
         commandQueue = device.makeCommandQueue()!
         vertexDescriptor = Renderer.buildVertexDescriptor()
         renderPipeline = Renderer.buildPipeline(device: device, view: view, vertexDescriptor: vertexDescriptor)
+        depthStencilState = Renderer.buildDepthStencilState(device: device)
         super.init()
         loadResources()
     }
@@ -57,6 +59,13 @@ class Renderer: NSObject, MTKViewDelegate {
         return vertexDescriptor
     }
     
+    static func buildDepthStencilState(device: MTLDevice) -> MTLDepthStencilState {
+        let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.depthCompareFunction = .less
+        depthStencilDescriptor.isDepthWriteEnabled = true
+        return device.makeDepthStencilState(descriptor: depthStencilDescriptor)!
+    }
+    
     static func buildPipeline(device: MTLDevice, view: MTKView, vertexDescriptor: MDLVertexDescriptor) -> MTLRenderPipelineState {
         guard let library = device.makeDefaultLibrary() else {
             fatalError("Could not load default library from main bundle")
@@ -70,7 +79,8 @@ class Renderer: NSObject, MTKViewDelegate {
         pipelineDescriptor.fragmentFunction = fragmentFunction
         
         pipelineDescriptor.colorAttachments[0].pixelFormat = view.colorPixelFormat
-        
+        pipelineDescriptor.depthAttachmentPixelFormat = view.depthStencilPixelFormat
+
         let mtlVertexDescriptor = MTKMetalVertexDescriptorFromModelIO(vertexDescriptor)
         pipelineDescriptor.vertexDescriptor = mtlVertexDescriptor
         
@@ -89,6 +99,8 @@ class Renderer: NSObject, MTKViewDelegate {
         
         if let renderPassDescriptor = view.currentRenderPassDescriptor, let drawable = view.currentDrawable {
             let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
+            
+            commandEncoder.setDepthStencilState(depthStencilState)
             
             time += 1 / Float(view.preferredFramesPerSecond)
             let angle = -time
