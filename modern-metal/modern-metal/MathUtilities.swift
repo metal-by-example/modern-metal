@@ -15,7 +15,8 @@ extension float4x4 {
     }
     
     init(rotationAbout axis: float3, by angleRadians: Float) {
-        let x = axis.x, y = axis.y, z = axis.z
+        let a = normalize(axis)
+        let x = a.x, y = a.y, z = a.z
         let c = cosf(angleRadians)
         let s = sinf(angleRadians)
         let t = 1 - c

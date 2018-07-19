@@ -24,10 +24,29 @@ class Node {
     init(name: String) {
         self.name = name
     }
+
+    func nodeNamedRecursive(_ name: String) -> Node? {
+        for node in children {
+            if node.name == name {
+                return node
+            } else if let matchingGrandchild = node.nodeNamedRecursive(name) {
+                return matchingGrandchild
+            }
+        }
+        return nil
+    }
 }
 
 class Scene {
     var rootNode = Node(name: "Root")
     var ambientLightColor = float3(0, 0, 0)
     var lights = [Light]()
+
+    func nodeNamed(_ name: String) -> Node? {
+        if rootNode.name == name {
+            return rootNode
+        } else {
+            return rootNode.nodeNamedRecursive(name)
+        }
+    }
 }
