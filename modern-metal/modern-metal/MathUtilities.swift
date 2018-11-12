@@ -49,7 +49,7 @@ extension float4x4 {
         self.init(float4(xx,  0,  0,  0),
                   float4( 0, yy,  0,  0),
                   float4( 0,  0, zz, zw),
-                  float4( 0,  0, wz,  1))
+                  float4( 0,  0, wz,  0))
     }
     
     var normalMatrix: float3x3 {
